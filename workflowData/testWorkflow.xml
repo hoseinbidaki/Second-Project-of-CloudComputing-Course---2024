@@ -1,0 +1,44 @@
+<adag xmlns="http://pegasus.isi.edu/schema/DAX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pegasus.isi.edu/schema/DAX http://pegasus.isi.edu/schema/dax-2.1.xsd" version="2.1" count="1" index="0" name="test" jobCount="7" fileCount="0" childCount="6">
+  <job id="ID00001" namespace="Montage" name="mProjectPP" version="1.0" runtime="1">
+  </job>
+  <job id="ID00002" namespace="Montage" name="Task2" version="1.0" runtime="2">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+  <job id="ID00003" namespace="Montage" name="Task3" version="1.0" runtime="3">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+  <job id="ID00004" namespace="Montage" name="Task4" version="1.0" runtime="4">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+  <job id="ID00005" namespace="Montage" name="Task5" version="1.0" runtime="5">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+  <job id="ID00006" namespace="Montage" name="Task6" version="1.0" runtime="6">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+  <job id="ID00007" namespace="Montage" name="Task7" version="1.0" runtime="7">
+    <!-- Define inputs and outputs as needed -->
+  </job>
+
+  <!-- Define child-parent relationships -->
+  <child ref="ID00002">
+    <parent ref="ID00001"/>
+  </child>
+  <child ref="ID00003">
+    <parent ref="ID00001"/>
+  </child>
+  <child ref="ID00004">
+    <parent ref="ID00002"/>
+  </child>
+  <child ref="ID00005">
+    <parent ref="ID00002"/>
+  </child>
+  <child ref="ID00006">
+    <parent ref="ID00003"/>
+  </child>
+  <child ref="ID00007">
+    <parent ref="ID00004"/>
+    <parent ref="ID00005"/>
+    <parent ref="ID00006"/>
+  </child>
+</adag>
