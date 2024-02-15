@@ -76,7 +76,6 @@ public class PCPBroker extends DatacenterBroker {
     }
 
     public void startEntity() {
-
         cloudletList = new ArrayList<Task>();
 
         File daxFile = new File(daxPath);
