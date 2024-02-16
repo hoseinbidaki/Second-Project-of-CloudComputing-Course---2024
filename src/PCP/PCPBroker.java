@@ -290,7 +290,7 @@ public class PCPBroker extends DatacenterBroker {
             {
                 if (find) break;
                 System.out.print("now check vm : " + checkVM.getId() + ": ");
-                if (canExecutedInVM(task, checkVM, true))
+                if (canExecutedInVM(task, checkVM))
                 {
                     System.out.println("passed :)");
                     find = true;
@@ -309,14 +309,8 @@ public class PCPBroker extends DatacenterBroker {
             if (!find)
             {
                 System.out.println("++ Can not find a suitable VM to run" + task.getCloudletId());
-                System.exit(-1);
-//                Vm newVM = createNewVM();
-//                task.setVmId(newVM.getId());
-//                sendNow(getVmsToDatacentersMap().get(newVM.getId()), CloudSimTags.CLOUDLET_SUBMIT, task);
-//                cloudletsSubmitted++;
-//                runningTask.add(task);
-//                System.out.println("Created a new VM (ID: " + newVM.getId() + ") for task " + task.getCloudletId());
-
+//                System.exit(-1);
+                continue;
             }
         }
         System.out.println("================================");
@@ -357,38 +351,20 @@ public class PCPBroker extends DatacenterBroker {
     }
 
 
-    protected boolean canExecutedInVM(Task task, Vm vm, boolean canRecursive)
+    protected boolean canExecutedInVM(Task task, Vm vm)
     {
-        if (task.getType().equals("Dummy node")) return true;
         double runtime = getNumberOfInstructions(task) / vm.getMips();
         double deadLine = 0;
         try {
             deadLine = subDeadLines.get(task);
         }catch (Exception e) {
-            deadLine = 9999999.99999;
+            deadLine = criticalPaths.get(0).getTotalRuntime();
         }
         System.out.println("========={runtime in vm: " + runtime + ", deadline is :" + deadLine + "}");
-        double cl = CloudSim.clock();
+        double cl = CloudSim.clock() * 1000;
         System.out.println("<clock> : " + cl + " (clock+runtime):" + (cl + runtime));
-        if (runtime + CloudSim.clock() > deadLine) return false;
-//        if (isBusy(vm)) {
-//            for (Vm v : getVmList())
-//            {
-//                if (!canRecursive) break;
-//                if (v.getId() < vm.getId()) continue;
-//                if (canExecutedInVM(task, v, false)) return false;
-//            }
-//        }
+        if (runtime + cl > 100+deadLine) return false;
         return true;
-    }
-
-    protected boolean isBusy(Vm vm)
-    {
-        for (Cloudlet cloudlet : runningTask)
-        {
-            if (cloudlet.getVmId() == vm.getId()) return true;
-        }
-        return false;
     }
 
     protected void processCloudletReturn(SimEvent ev) {

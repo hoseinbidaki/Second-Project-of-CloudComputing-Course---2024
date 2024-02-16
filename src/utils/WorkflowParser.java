@@ -153,14 +153,14 @@ public final class WorkflowParser {
      * @param task the task
      * @param depth the depth
      */
-    private void setDepth(Task task, int depth) {
-        if (depth > task.getDepth()) {
-            task.setDepth(depth);
-        }
-        for (Task cTask : task.getChildList()) {
-            setDepth(cTask, task.getDepth() + 1);
-        }
-    }
+//    private void setDepth(Task task, int depth) {
+//        if (depth > task.getDepth()) {
+//            task.setDepth(depth);
+//        }
+//        for (Task cTask : task.getChildList()) {
+//            setDepth(cTask, task.getDepth() + 1);
+//        }
+//    }
 
     /**
      * Parse a DAX file with jdom
@@ -328,7 +328,7 @@ public final class WorkflowParser {
              */
             for (Iterator it = roots.iterator(); it.hasNext();) {
                 Task task = (Task) it.next();
-                setDepth(task, 1);
+//                setDepth(task, 1);
             }
             /**
              * Clean them so as to save memory. Parsing workflow may take much
