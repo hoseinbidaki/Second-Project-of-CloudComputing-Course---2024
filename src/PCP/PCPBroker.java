@@ -94,7 +94,6 @@ public class PCPBroker extends DatacenterBroker {
         int vms = (int) Math.ceil(nw / (14.0 * dw));
 
         System.out.println("@@@@@@ vms is : " + vms);
-
         int pesNumber = 1; //number of cpus
 
         String vmm = "Xen"; //VMM name
