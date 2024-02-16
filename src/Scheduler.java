@@ -1,10 +1,7 @@
 import java.text.DecimalFormat;
 import java.util.*;
 
-import LJF.LJFBroker;
 import PCP.PCPBroker;
-import SJF.SJFBroker;
-import SSTF.SSTFBroker;
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
@@ -35,7 +32,12 @@ public class Scheduler {
 
 			// Third step: Create Broker
 			DatacenterBroker broker = createMyBroker("My_Broker",
-					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
+					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_30.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/LIGO_500_1.xml", WorkflowType.LIGO, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/SIPHT_500_1.xml", WorkflowType.SIPHT, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST, SchedulerType.PCP);
 
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
@@ -43,11 +45,9 @@ public class Scheduler {
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
 
 			CloudSim.stopSimulation();
-
+//
 			Collections.sort(newList, (t1, t2) ->
-//					Integer.compare(t2.getCloudletId(), t1.getCloudletId()));
-					Double.compare(t2.getExecStartTime(), t1.getExecStartTime()));
-			Collections.reverse(newList);
+					Double.compare(t1.getExecStartTime(), t2.getExecStartTime()));
 
 			printCloudletList(newList);
 
@@ -76,7 +76,7 @@ public class Scheduler {
 		// In this example, it will have only one core.
 		List<Pe> peList = new ArrayList<Pe>();
 
-		int mips = 100000000;
+		long mips = 1_000_000_000;
 
 		// 3. Create PEs and add these into a list.
 		peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
@@ -84,8 +84,8 @@ public class Scheduler {
 		// 4. Create Host with its id and list of PEs and add them to the list
 		// of machines
 		int hostId = 0;
-		int ram = 20480; // host memory (MB)
-		long storage = 1000000; // host storage
+		int ram = 16 * 20_480; // host memory (MB)
+		long storage = 100_000_000; // host storage
 		int bw = 100000;
 
 		hostList.add(
@@ -99,10 +99,56 @@ public class Scheduler {
 			)
 		); // This is our machine
 
+		hostList.add(
+				new Host(
+						hostId + 1,
+						new RamProvisionerSimple(ram),
+						new BwProvisionerSimple(bw),
+						storage,
+						peList,
+						new VmSchedulerTimeShared(peList)
+				)
+		); // This is our machine
+
+
+		hostList.add(
+				new Host(
+						hostId + 2,
+						new RamProvisionerSimple(ram),
+						new BwProvisionerSimple(bw),
+						storage,
+						peList,
+						new VmSchedulerTimeShared(peList)
+				)
+		); // This is our machine
+
+		hostList.add(
+				new Host(
+						hostId + 3,
+						new RamProvisionerSimple(ram),
+						new BwProvisionerSimple(bw),
+						storage,
+						peList,
+						new VmSchedulerTimeShared(peList)
+				)
+		); // This is our machine
+
+		hostList.add(
+				new Host(
+						hostId + 4,
+						new RamProvisionerSimple(ram),
+						new BwProvisionerSimple(bw),
+						storage,
+						peList,
+						new VmSchedulerTimeShared(peList)
+				)
+		); // This is our machine
+
+
 		// 5. Create a DatacenterCharacteristics object that stores the
 		// properties of a data center: architecture, OS, list of
 		// Machines, allocation policy: time- or space-shared, time zone
-		// and its price (G$/Pe time unit).
+		// and its price (G$w/Pe time unit).
 		String arch = "x86"; // system architecture
 		String os = "Linux"; // operating system
 		String vmm = "Xen";
@@ -174,9 +220,6 @@ public class Scheduler {
 		DatacenterBroker broker = null;
 		try {
 			switch (schedulerType){
-				case SJF : broker = new SJFBroker(name, path, workflowType);break;
-				case LJF : broker = new LJFBroker(name, path, workflowType);break;
-				case SSTF : broker = new SSTFBroker(name, path, workflowType);break;
 				case PCP: broker = new PCPBroker(name, path, workflowType);break;
 			}
 

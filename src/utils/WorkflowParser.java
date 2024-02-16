@@ -1,4 +1,23 @@
-package utils;
+package utils; /**
+ * Copyright 2012-2013 University Of Southern California
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import org.cloudbus.cloudsim.Log;
 import org.jdom2.Document;
@@ -6,13 +25,28 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import utils.FileItem;
+import utils.FileType;
+import utils.ReplicaCatalog;
+import utils.Task;
 
-public class WorkflowParser {
+/**
+ * WorkflowParser parse a DAX into tasks so that WorkflowSim can manage them
+ *
+ * @author Weiwei Chen
+ * @since WorkflowSim Toolkit 1.0
+ * @date Aug 23, 2013
+ * @date Nov 9, 2014
+ */
+public final class WorkflowParser {
 
+    /**
+     * The path to DAX file.
+     */
     private final String daxPath;
+    /**
+     * The path to DAX files.
+     */
     /**
      * All tasks.
      */
@@ -23,36 +57,48 @@ public class WorkflowParser {
     private final int userId;
 
     /**
-     * The scale of runtime. Multiple runtime by this
-     */
-    private static double runtime_scale = 1.0;
-
-    /**
      * current job id. In case multiple workflow submission
      */
     private int jobIdStartsFrom;
 
+    /**
+     * Gets the task list
+     *
+     * @return the task list
+     */
+    @SuppressWarnings("unchecked")
     public List<Task> getTaskList() {
         return taskList;
     }
 
+    /**
+     * Sets the task list
+     *
+     * @param taskList the task list
+     */
     protected void setTaskList(List<Task> taskList) {
         this.taskList = taskList;
     }
-
     /**
      * Map from task name to task.
      */
     protected Map<String, Task> mName2Task;
 
+    /**
+     * Initialize a WorkflowParser
+     *
+     * @param userId the user id. Currently we have just checked single user
+     * mode
+     */
     public WorkflowParser(int userId, String daxPath) {
         this.userId = userId;
         this.mName2Task = new HashMap<>();
-        this.daxPath = daxPath;
-//        this.daxPaths = getDAXPaths();
-        this.jobIdStartsFrom = 0;
+//        this.daxPath = Parameters.getDaxPath();
+//        this.daxPaths = Parameters.getDAXPaths();
+        this.jobIdStartsFrom = 1;
 
         setTaskList(new ArrayList<>());
+        this.daxPath = daxPath;
     }
 
     /**
@@ -61,13 +107,68 @@ public class WorkflowParser {
     public void parse() {
         if (this.daxPath != null) {
             parseXmlFile(this.daxPath);
-        } else {
-            Log.print("file not found");
+            int last_index = getTaskList().size() + 1;
+            Task root = new Task(0, 0);
+            Task tail = new Task(last_index, 0);
+            root.setType("Dummy node");
+            tail.setType("Dummy node");
+            root.setUserId(userId);
+            tail.setUserId(userId);
+            for (Task task : getTaskList())
+            {
+                if (task.getParentList().isEmpty())
+                {
+                    //not have parent
+                    System.out.println(task.getCloudletId() + " not have parent!");
+                    root.addChild(task);
+                    task.addParent(root);
+                }
+                if (task.getChildList().isEmpty())
+                {
+                    //not have child
+                    System.out.println(task.getCloudletId() + " not have child!");
+                    tail.addParent(task);
+                    task.addChild(tail);
+                }
+            }
+            getTaskList().add(root);
+            getTaskList().add(tail);
+            Collections.sort(getTaskList(), (t1, t2) ->
+					Integer.compare(t1.getCloudletId(), t2.getCloudletId()));
+            System.out.println("==================graph is===================");
+            for (Task task : getTaskList())
+            {
+                System.out.println("now in " + task.getCloudletId());
+                for (Task child : task.getChildList())
+                {
+                    System.out.println(task.getCloudletId() + " -> " + child.getCloudletId());
+                }
+            }
         }
     }
 
+    /**
+     * Sets the depth of a task
+     *
+     * @param task the task
+     * @param depth the depth
+     */
+    private void setDepth(Task task, int depth) {
+        if (depth > task.getDepth()) {
+            task.setDepth(depth);
+        }
+        for (Task cTask : task.getChildList()) {
+            setDepth(cTask, task.getDepth() + 1);
+        }
+    }
+
+    /**
+     * Parse a DAX file with jdom
+     */
     private void parseXmlFile(String path) {
+
         try {
+
             SAXBuilder builder = new SAXBuilder();
             //parse using builder to get DOM representation of the XML file
             Document dom = builder.build(new File(path));
@@ -95,7 +196,7 @@ public class WorkflowParser {
                         } else {
                             Log.printLine("Cannot find runtime for " + nodeName + ",set it to be 0");
                         }   //multiple the scale, by default it is 1.0
-                        length *= getRuntimeScale();
+//                        length *= Parameters.getRuntimeScale();
                         List<Element> fileList = node.getChildren();
                         List<FileItem> mFileList = new ArrayList<>();
                         for (Element file : fileList) {
@@ -163,6 +264,7 @@ public class WorkflowParser {
                                 } else if (ReplicaCatalog.containsFile(fileName)) {
                                     tFile = ReplicaCatalog.getFile(fileName);
                                 } else {
+
                                     tFile = new FileItem(fileName, size);
                                     ReplicaCatalog.setFile(fileName, tFile);
                                 }
@@ -228,7 +330,7 @@ public class WorkflowParser {
                 Task task = (Task) it.next();
                 setDepth(task, 1);
             }
-            /*
+            /**
              * Clean them so as to save memory. Parsing workflow may take much
              * memory
              */
@@ -246,16 +348,4 @@ public class WorkflowParser {
         }
     }
 
-    private void setDepth(Task task, int depth) {
-        if (depth > task.getDepth()) {
-            task.setDepth(depth);
-        }
-        for (Task cTask : task.getChildList()) {
-            setDepth(cTask, task.getDepth() + 1);
-        }
-    }
-
-    public static double getRuntimeScale(){
-        return runtime_scale;
-    }
 }
