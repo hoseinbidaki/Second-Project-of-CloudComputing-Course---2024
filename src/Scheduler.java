@@ -8,7 +8,6 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import utils.Accountant;
-import utils.Task;
 import utils.WorkflowType;
 
 
@@ -34,11 +33,10 @@ public class Scheduler {
 
 			// Third step: Create Broker
 			DatacenterBroker broker = createMyBroker("My_Broker",
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/LIGO_500_1.xml", WorkflowType.LIGO);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE);
+					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/SIPHT_500_1.xml", WorkflowType.SIPHT);
-					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow2.xml", WorkflowType.TEST);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow2.xml", WorkflowType.TEST);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST);
 
 			// Sixth step: Starts the simulation
@@ -90,7 +88,7 @@ public class Scheduler {
 		int hostId = 0;
 		int ram = 16 * 2048; // host memory (MB)
 		long storage = 100_000_000; // host storage
-		int bw = 100000;
+		int bw = 100_000;
 
 		int hostNumber = 4;
 

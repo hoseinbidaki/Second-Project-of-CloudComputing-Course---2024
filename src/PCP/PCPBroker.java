@@ -1,15 +1,15 @@
 package PCP;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.VmList;
-import sun.misc.VM;
+
 import utils.*;
 
-import javax.sound.midi.Soundbank;
+
 import java.io.File;
 import java.util.*;
 
@@ -309,8 +309,6 @@ public class PCPBroker extends DatacenterBroker {
             if (!find)
             {
                 System.out.println("++ Can not find a suitable VM to run" + task.getCloudletId());
-//                System.exit(-1);
-                continue;
             }
         }
         System.out.println("================================");
@@ -357,7 +355,8 @@ public class PCPBroker extends DatacenterBroker {
         double deadLine = 0;
         try {
             deadLine = subDeadLines.get(task);
-        }catch (Exception e) {
+        }
+        catch (Exception e) {
             deadLine = criticalPaths.get(0).getTotalRuntime();
         }
         System.out.println("========={runtime in vm: " + runtime + ", deadline is :" + deadLine + "}");
@@ -389,6 +388,7 @@ public class PCPBroker extends DatacenterBroker {
 
         }
     }
+
     @Override
     public void shutdownEntity() {
         super.shutdownEntity();
