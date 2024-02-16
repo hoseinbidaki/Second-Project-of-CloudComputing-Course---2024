@@ -6,6 +6,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.VmList;
+import sun.misc.VM;
 import utils.*;
 
 import javax.sound.midi.Soundbank;
@@ -51,18 +52,17 @@ public class PCPBroker extends DatacenterBroker {
 
     private String daxPath;
 
+    private int vmId;
     HashMap<Cloudlet, Double> subDeadLines;
     List<CriticalPath> criticalPaths;
     List<Cloudlet> runningTask;
     WorkflowType workflowType;
-
 
     public PCPBroker(String name, String daxPath, WorkflowType workflowType) throws Exception {
         super(name);
         this.daxPath = daxPath;
         this.workflowType = workflowType;
     }
-
     public void startEntity() {
         cloudletList = new ArrayList<Task>();
 
@@ -100,25 +100,26 @@ public class PCPBroker extends DatacenterBroker {
         String vmm = "Xen"; //VMM name
 
         List<Vm> vmList = new ArrayList<>();
+        vmId = 0;
         for (int i = 0; i < vms; i++) {
-            Vm vm = new Vm(i, getId(), mips1, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+            Vm vm = new Vm(vmId++, getId(), mips1, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
             vmList.add(vm);
 //			sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
         }
         for (int i = vms; i < 2 * vms; i++) {
-            Vm vm = new Vm(i, getId(), mips2, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+            Vm vm = new Vm(vmId++, getId(), mips2, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
             vmList.add(vm);
 //			sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
         }
 
         for (int i = 2 * vms; i < 3 * vms; i++) {
-            Vm vm = new Vm(i, getId(), mips3, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+            Vm vm = new Vm(vmId++, getId(), mips3, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
             vmList.add(vm);
 //			sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
         }
 
         for (int i = 3 * vms; i < 4 * vms; i++) {
-            Vm vm = new Vm(i, getId(), mips4, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+            Vm vm = new Vm(vmId++, getId(), mips4, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
             vmList.add(vm);
 //			sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
         }
@@ -144,7 +145,6 @@ public class PCPBroker extends DatacenterBroker {
             System.out.println(cloudlet.getCloudletId() + " : " + subDeadLines.get(cloudlet));
         }
     }
-
     @Override
     public void processEvent(SimEvent ev) {
         switch (ev.getTag()) {
@@ -173,7 +173,6 @@ public class PCPBroker extends DatacenterBroker {
                 break;
         }
     }
-
     protected void processVmCreate(SimEvent ev) {
         int[] data = (int[]) ev.getData();
         int datacenterId = data[0];
@@ -218,7 +217,6 @@ public class PCPBroker extends DatacenterBroker {
             }
         }
     }
-
     protected boolean checkReady(Task task) {
         for (Task parent : task.getParentList())
         {
@@ -226,11 +224,9 @@ public class PCPBroker extends DatacenterBroker {
         }
         return true;
     }
-
     protected long getNumberOfInstructions(Task task) {
         return task.getCloudletLength() * 1000;
     }
-
     protected double getMaxMipsOfVMS() {
         double maximum_mips = 2000;
         return maximum_mips;
@@ -238,7 +234,7 @@ public class PCPBroker extends DatacenterBroker {
     protected void setSubDeadlines(CriticalPath criticalPath, boolean have_dummy_node)
     {
         double total_run_time = 0;
-        System.out.println("details of critical paths:");
+        System.out.println("==============Critical Paths details on fastest resource===============:");
         HashMap<Task, Double> fastest_run_times = new HashMap<>();
         for (Task task : criticalPath.getPath())
         {
@@ -247,32 +243,32 @@ public class PCPBroker extends DatacenterBroker {
             fastest_run_times.put(task, fastest_run_time);
             total_run_time += fastest_run_time;
         }
+        System.out.println("total :" + total_run_time);
+        System.out.printf("--------------");
         double extra = criticalPath.getTotalRuntime() - total_run_time;
         double additional_time = extra / (criticalPath.getPath().size() - (2 * (have_dummy_node ? 1 : 0)));
-
-        System.out.println("total new critical time:" + total_run_time);
-        System.out.println("--------------");
         Collections.reverse(criticalPath.getPath());
-
-        for (int i = 0; i < criticalPath.getPath().size(); i++){
+        for (int i = 0; i < criticalPath.getPath().size(); i++)
+        {
             Task criticalTask = criticalPath.getPath().get(i);
-            double val = additional_time + fastest_run_times.get(criticalTask);
-            subDeadLines.put(criticalTask , val);
-//            Task parent = criticalTask.getCriticalParent(getCloudletList());
-//            if (parent == null)
-//            {
-//                double val = additional_time + fastest_run_times.get(criticalTask);
-//                subDeadLines.put(criticalTask , val);
-//            }
-//            else
-//            {
-//                double parent_val = subDeadLines.get(parent);
-//                double val = additional_time + fastest_run_times.get(criticalTask);
-//                subDeadLines.put(criticalTask, parent_val + val);
-//            }
+            Task parent = criticalTask.getCriticalParent(getCloudletList());
+            double val = fastest_run_times.get(criticalTask);
+            if (!criticalTask.getType().equals("Dummy node"))
+            {
+                val += additional_time;
+            }
+            if (parent != null)
+            {
+
+                double parent_val = subDeadLines.get(parent);
+                val += parent_val;
+            }
+            subDeadLines.put(criticalTask, val);
         }
         System.out.println("");
     }
+
+
 
     @Override
     protected void submitCloudlets() {
@@ -311,8 +307,15 @@ public class PCPBroker extends DatacenterBroker {
 
             if (!find)
             {
-                System.out.println("Can not find a suitable VM to run" + task.getCloudletId());
-                                System.exit(-1);
+                System.out.println("++ Can not find a suitable VM to run" + task.getCloudletId());
+                System.exit(-1);
+//                Vm newVM = createNewVM();
+//                task.setVmId(newVM.getId());
+//                sendNow(getVmsToDatacentersMap().get(newVM.getId()), CloudSimTags.CLOUDLET_SUBMIT, task);
+//                cloudletsSubmitted++;
+//                runningTask.add(task);
+//                System.out.println("Created a new VM (ID: " + newVM.getId() + ") for task " + task.getCloudletId());
+
             }
         }
         System.out.println("================================");
@@ -320,9 +323,19 @@ public class PCPBroker extends DatacenterBroker {
         for (Cloudlet cloudlet : getCloudletSubmittedList()) {
             getCloudletList().remove(cloudlet);
         }
-
     }
 
+    private Vm createNewVM() {
+        Vm newVM = new Vm(vmId, getId(), 2000, 1, 512,
+                1000, 10_000, "Xen", new CloudletSchedulerTimeShared());
+        getVmsCreatedList().add(newVM);
+        getVmsToDatacentersMap().put(newVM.getId(), getId());
+        getVmList().add(newVM);
+        int arr [] = {getId(), newVM.getId(), CloudSimTags.TRUE};
+        sendNow(getId(), CloudSimTags.CLOUDLET_SUBMIT_ACK, arr);
+        vmId++;
+        return newVM;
+    }
     protected CriticalPath getCriticalPath(Cloudlet cloudlet)
     {
         if (criticalPaths == null) return null;
@@ -342,14 +355,21 @@ public class PCPBroker extends DatacenterBroker {
         return -1;
     }
 
+
     protected boolean canExecutedInVM(Task task, Vm vm, boolean canRecursive)
     {
-//        double runtime = getNumberOfInstructions(task) / vm.getMips();
-//        double deadLine = subDeadLines.get(task);
-//        System.out.println("========={runtime in vm: " + runtime + ", deadline is :" + deadLine + "}");
-////        double cl = CloudSim.clock() * 1000;
-////        System.out.println("<clock> : " + cl + " (clock+runtime):" + (cl + runtime));
-//        if (runtime > deadLine) return false;
+        if (task.getType().equals("Dummy node")) return true;
+        double runtime = getNumberOfInstructions(task) / vm.getMips();
+        double deadLine = 0;
+        try {
+            deadLine = subDeadLines.get(task);
+        }catch (Exception e) {
+            deadLine = 9999999.99999;
+        }
+        System.out.println("========={runtime in vm: " + runtime + ", deadline is :" + deadLine + "}");
+        double cl = CloudSim.clock();
+        System.out.println("<clock> : " + cl + " (clock+runtime):" + (cl + runtime));
+        if (runtime + CloudSim.clock() > deadLine) return false;
 //        if (isBusy(vm)) {
 //            for (Vm v : getVmList())
 //            {
@@ -392,13 +412,10 @@ public class PCPBroker extends DatacenterBroker {
 
         }
     }
-
     @Override
     public void shutdownEntity() {
-        // TODO Auto-generated method stub
         super.shutdownEntity();
     }
-
 
     public void printCriticalParent(List<Task> tasks) {
         for (Task task : tasks) {
@@ -412,10 +429,6 @@ public class PCPBroker extends DatacenterBroker {
         }
     }
 
-    /*
-     * find PCP -> find every partial critical path and save it in list, all PCPs are available in list of
-     * CriticalPath (which contains one partial critical path)
-     */
 
     public List<CriticalPath> findPCP(List<Task> tasks){
         List<Task> copy = new ArrayList<>();
@@ -442,10 +455,6 @@ public class PCPBroker extends DatacenterBroker {
         return pcp;
     }
 
-    /*
-     * find a partial critical path -> choose critical parent (that not in critical path already)
-     * and add it to a list. The list includes of critical parent of ... critical parent of node.
-     */
 
     public CriticalPath findCriticalPath(List<Task> tasks,Task task){
         Task temp = task;
@@ -459,11 +468,13 @@ public class PCPBroker extends DatacenterBroker {
     }
 
     public void printPCP(List<CriticalPath> pcp){
+        System.out.println("=================Critical Path================");
         for (CriticalPath cp : pcp){
             System.out.println("critical path total runtime = " + cp.getTotalRuntime());
             for (Task task : cp.getPath()){
                 System.out.println("task id = " + task.getCloudletId() + ", task runtime = " + task.getCloudletLength());
             }
+            System.out.println("--------------------");
         }
     }
 

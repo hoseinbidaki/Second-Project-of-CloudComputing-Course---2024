@@ -33,12 +33,12 @@ public class Scheduler {
 
 			// Third step: Create Broker
 			DatacenterBroker broker = createMyBroker("My_Broker",
-					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_30.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/LIGO_500_1.xml", WorkflowType.LIGO, SchedulerType.PCP);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE, SchedulerType.PCP);
 //					"/Users/hossein/IdeaProjects/CloudSim/workflowData/SIPHT_500_1.xml", WorkflowType.SIPHT, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST, SchedulerType.PCP);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow2.xml", WorkflowType.TEST, SchedulerType.PCP);
+					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST, SchedulerType.PCP);
 
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
@@ -82,68 +82,28 @@ public class Scheduler {
 		// 3. Create PEs and add these into a list.
 		peList.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
 
+
 		// 4. Create Host with its id and list of PEs and add them to the list
 		// of machines
 		int hostId = 0;
-		int ram = 16 * 20_480; // host memory (MB)
+		int ram = 16 * 2048; // host memory (MB)
 		long storage = 100_000_000; // host storage
 		int bw = 100000;
 
-		hostList.add(
-			new Host(
-				hostId,
-				new RamProvisionerSimple(ram),
-				new BwProvisionerSimple(bw),
-				storage,
-				peList,
-				new VmSchedulerTimeShared(peList)
-			)
-		); // This is our machine
+		int hostNumber = 4;
 
-		hostList.add(
-				new Host(
-						hostId + 1,
-						new RamProvisionerSimple(ram),
-						new BwProvisionerSimple(bw),
-						storage,
-						peList,
-						new VmSchedulerTimeShared(peList)
-				)
-		); // This is our machine
-
-
-		hostList.add(
-				new Host(
-						hostId + 2,
-						new RamProvisionerSimple(ram),
-						new BwProvisionerSimple(bw),
-						storage,
-						peList,
-						new VmSchedulerTimeShared(peList)
-				)
-		); // This is our machine
-
-		hostList.add(
-				new Host(
-						hostId + 3,
-						new RamProvisionerSimple(ram),
-						new BwProvisionerSimple(bw),
-						storage,
-						peList,
-						new VmSchedulerTimeShared(peList)
-				)
-		); // This is our machine
-
-		hostList.add(
-				new Host(
-						hostId + 4,
-						new RamProvisionerSimple(ram),
-						new BwProvisionerSimple(bw),
-						storage,
-						peList,
-						new VmSchedulerTimeShared(peList)
-				)
-		); // This is our machine
+		for (int i = 0 ; i < hostNumber; i++) {
+			hostList.add(
+					new Host(
+							hostId + i,
+							new RamProvisionerSimple(ram),
+							new BwProvisionerSimple(bw),
+							storage,
+							peList,
+							new VmSchedulerTimeShared(peList)
+					)
+			); // This is our machine
+		}
 
 
 		// 5. Create a DatacenterCharacteristics object that stores the

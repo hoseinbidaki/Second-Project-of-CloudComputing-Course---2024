@@ -215,7 +215,8 @@ public class DatacenterBroker extends SimEntity {
 	 * @pre ev != null
 	 * @post $none
 	 */
-	protected void processVmCreate(SimEvent ev) {
+	protected void processVmCreate(SimEvent ev)
+	{
 		int[] data = (int[]) ev.getData();
 		int datacenterId = data[0];
 		int vmId = data[1];

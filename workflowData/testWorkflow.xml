@@ -1,22 +1,22 @@
 <adag xmlns="http://pegasus.isi.edu/schema/DAX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pegasus.isi.edu/schema/DAX http://pegasus.isi.edu/schema/dax-2.1.xsd" version="2.1" count="1" index="0" name="test" jobCount="7" fileCount="0" childCount="6">
-  <job id="ID00001" namespace="Epigenomics" name="mProjectPP" version="1.0" runtime="1">
+  <job id="ID00001" namespace="Epigenomics" name="mProjectPP" version="1.0" runtime="10">
   </job>
-  <job id="ID00002" namespace="Epigenomics" name="Task2" version="1.0" runtime="2">
+  <job id="ID00002" namespace="Epigenomics" name="Task2" version="1.0" runtime="20">
     <!-- Define inputs and outputs as needed -->
   </job>
-  <job id="ID00003" namespace="Epigenomics" name="Task3" version="1.0" runtime="3">
+  <job id="ID00003" namespace="Epigenomics" name="Task3" version="1.0" runtime="30">
     <!-- Define inputs and outputs as needed -->
   </job>
-  <job id="ID00004" namespace="Epigenomics" name="Task4" version="1.0" runtime="4">
+  <job id="ID00004" namespace="Epigenomics" name="Task4" version="1.0" runtime="40">
     <!-- Define inputs and outputs as needed -->
   </job>
-  <job id="ID00005" namespace="Epigenomics" name="Task5" version="1.0" runtime="5">
+  <job id="ID00005" namespace="Epigenomics" name="Task5" version="1.0" runtime="50">
     <!-- Define inputs and outputs as needed -->
   </job>
-  <job id="ID00006" namespace="Epigenomics" name="Task6" version="1.0" runtime="6">
+  <job id="ID00006" namespace="Epigenomics" name="Task6" version="1.0" runtime="60">
     <!-- Define inputs and outputs as needed -->
   </job>
-  <job id="ID00007" namespace="Epigenomics" name="Task7" version="1.0" runtime="7">
+  <job id="ID00007" namespace="Epigenomics" name="Task7" version="1.0" runtime="70">
     <!-- Define inputs and outputs as needed -->
   </job>
 
