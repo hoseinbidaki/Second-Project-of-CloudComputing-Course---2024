@@ -7,7 +7,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
-import utils.SchedulerType;
+import utils.Accountant;
+import utils.Task;
 import utils.WorkflowType;
 
 
@@ -33,17 +34,18 @@ public class Scheduler {
 
 			// Third step: Create Broker
 			DatacenterBroker broker = createMyBroker("My_Broker",
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/LIGO_500_1.xml", WorkflowType.LIGO, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/SIPHT_500_1.xml", WorkflowType.SIPHT, SchedulerType.PCP);
-//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow2.xml", WorkflowType.TEST, SchedulerType.PCP);
-					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST, SchedulerType.PCP);
+					"/Users/hossein/IdeaProjects/CloudSim/workflowData/CyberShake_500_1.xml", WorkflowType.CYBER_SHAKE);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/LIGO_500_1.xml", WorkflowType.LIGO);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/Montage_500_1.xml", WorkflowType.MONTAGE);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/SIPHT_500_1.xml", WorkflowType.SIPHT);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow2.xml", WorkflowType.TEST);
+//					"/Users/hossein/IdeaProjects/CloudSim/workflowData/testWorkflow.xml", WorkflowType.TEST);
 
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
 
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
+
 
 			CloudSim.stopSimulation();
 //
@@ -149,10 +151,13 @@ public class Scheduler {
 				indent + "VM ID" +
 				indent + indent + "Time" +
 				indent + "Start Time" +
-				indent + "Finish Time");
+				indent + "Finish Time" +
+				indent + "price"
+		);
 
 		DecimalFormat dft = new DecimalFormat("###.##");
 		dft.setMinimumIntegerDigits(2);
+		double total_run_time = 0;
 		for (int i = 0; i < size; i++) {
 			cloudlet = list.get(i);
 			Log.print(indent + dft.format(cloudlet.getCloudletId()) + indent + indent);
@@ -164,26 +169,21 @@ public class Scheduler {
 						indent + indent + indent + dft.format(cloudlet.getVmId()) +
 						indent + indent + dft.format(cloudlet.getActualCPUTime()) +
 						indent + indent + dft.format(cloudlet.getExecStartTime()) +
-						indent + indent + indent + dft.format(cloudlet.getFinishTime()));
+						indent + indent + indent + dft.format(cloudlet.getFinishTime()) +
+						indent + indent + indent + dft.format(Accountant.getInstance().getCash((cloudlet))) + "$")
+						;
+
+				total_run_time = cloudlet.getFinishTime();
 			}
 		}
+		Log.printLine("total cash is : " + Accountant.getInstance().getTotalCash() + "$");
+		Log.printLine("total time is : " + total_run_time + "ms");
 	}
 
-	// We strongly encourage users to develop their own broker policies, to
-	// submit vms and cloudlets according
-	// to the specific rules of the simulated scenario
-	/**
-	 * Creates the broker.
-	 *
-	 * @return the datacenter broker
-	 */
-	private static DatacenterBroker createMyBroker(String name, String path, WorkflowType workflowType, SchedulerType schedulerType) {
+	private static DatacenterBroker createMyBroker(String name, String path, WorkflowType workflowType) {
 		DatacenterBroker broker = null;
 		try {
-			switch (schedulerType){
-				case PCP: broker = new PCPBroker(name, path, workflowType);break;
-			}
-
+			broker = new PCPBroker(name, path, workflowType);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

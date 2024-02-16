@@ -299,6 +299,7 @@ public class PCPBroker extends DatacenterBroker {
                     cloudletsSubmitted++;
                     getCloudletSubmittedList().add(task);
                     runningTask.add(task);
+                    Accountant.getInstance().use(task, checkVM);
                 }
                 else {
                     System.out.println("Reject!");
